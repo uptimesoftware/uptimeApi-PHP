@@ -13,6 +13,12 @@ $uptime_api_ssl = true;
 // Create API object
 $uptime_api = new uptimeApi($uptime_api_username, $uptime_api_password, $uptime_api_hostname, $uptime_api_port, $uptime_api_version, $uptime_api_ssl);
 
+// test auth
+$apiInfo = $uptime_api->getApiInfo();
+if ( $uptime_api->testAuth() ) {
+	print "Successfully logged in";
+}
+
 // get array objects
 $groups = $uptime_api->getGroups();
 $elements = $uptime_api->getElements();
@@ -37,6 +43,8 @@ $monitorsFiltered = $uptime_api->getMonitors("isMonitored=true&name=PING-.*", $e
 
 
 // print all array objects
+print_r($apiInfo);
+
 print_r($groups);
 print_r($elements);
 print_r($monitors);

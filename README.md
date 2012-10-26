@@ -17,6 +17,8 @@ Documentation
 
 How to Use in PHP
 -----------------
+Have a look at the included example file.
+
 First we import the uptimeApi class:
 
 	require_once("uptimeApi.php");
@@ -24,8 +26,8 @@ First we import the uptimeApi class:
 Next we initialize the uptimeApi object:
 
 	// Setup uptime API variables
-	$uptime_api_username = "";
-	$uptime_api_password = "";
+	$uptime_api_username = "admin";
+	$uptime_api_password = "admin";
 	$uptime_api_hostname = "localhost";		// up.time Controller hostname (usually localhost, but not always)
 	$uptime_api_port = 9997;
 	$uptime_api_version = "v1";
@@ -36,24 +38,30 @@ Next we initialize the uptimeApi object:
 
 Now we can call any of the uptimeApi functions and use/manipulate the returned array objects:
 
-	// get array objects
-	$groups = $uptime_api->getGroups();
-	$elements = $uptime_api->getElements();
-	$monitors = $uptime_api->getMonitors();
+	// test auth
+	$apiInfo = $uptime_api->getApiInfo();
+	if ( $uptime_api->testAuth() ) {
+		print "Successfully logged in";
 	
-	// get status of an object
-	$groupId = 1;
-	$elementId = 1;
-	$monitorId = 1;
-	$groupStatus = $uptime_api->getGroupStatus($groupId);
-	$elementStatus = $uptime_api->getElementStatus($elementId);
-	$monitorStatus = $uptime_api->getMonitorStatus($monitorId);
-	
-	// use filters and/or error message (both are optional)
-	// filters will look at variables one level deep in the array
-	// they can accept multiple filters and are also regex compatible
-	$groupsFiltered = $uptime_api->getGroups("name=My Infrastructure", $errorMsg);
-	$elementsFiltered = $uptime_api->getElements("isMonitored=true", $errorMsg);
-	$monitorsFiltered = $uptime_api->getMonitors("isMonitored=true&name=PING-.*", $errorMsg);
+		// get array objects
+		$groups = $uptime_api->getGroups();
+		$elements = $uptime_api->getElements();
+		$monitors = $uptime_api->getMonitors();
+		
+		// get status of an object
+		$groupId = 1;
+		$elementId = 1;
+		$monitorId = 1;
+		$groupStatus = $uptime_api->getGroupStatus($groupId);
+		$elementStatus = $uptime_api->getElementStatus($elementId);
+		$monitorStatus = $uptime_api->getMonitorStatus($monitorId);
+		
+		// use filters and/or error message (both are optional)
+		// filters will look at variables one level deep in the array
+		// they can accept multiple filters and are also regex compatible
+		$groupsFiltered = $uptime_api->getGroups("name=My Infrastructure", $errorMsg);
+		$elementsFiltered = $uptime_api->getElements("isMonitored=true", $errorMsg);
+		$monitorsFiltered = $uptime_api->getMonitors("isMonitored=true&name=PING-.*", $errorMsg);
+	}
 
 Happy Coding!
