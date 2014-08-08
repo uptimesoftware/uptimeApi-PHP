@@ -2,6 +2,8 @@
 // require the uptimeApi
 require_once("uptimeApi.php");
 
+header('Content-type: text/plain');
+
 // Setup uptime API variables
 $uptime_api_username = "";
 $uptime_api_password = "";
@@ -16,7 +18,7 @@ $uptime_api = new uptimeApi($uptime_api_username, $uptime_api_password, $uptime_
 // test auth
 $apiInfo = $uptime_api->getApiInfo();
 if ( $uptime_api->testAuth() ) {
-	print "Successfully logged in";
+	print "Successfully logged in\n";
 }
 
 // get array objects
@@ -45,18 +47,26 @@ $monitorsFiltered = $uptime_api->getMonitors("isMonitored=true&name=PING-.*", $e
 // print all array objects
 print_r($apiInfo);
 
+print "\nGroups:\n";
 print_r($groups);
+print "\nElements:\n";
 print_r($elements);
+print "\nMonitors:\n";
 print_r($monitors);
 
+print "\nGroup Status:\n";
 print_r($groupStatus);
+print "\nElement Status:\n";
 print_r($elementStatus);
+print "\nMonitor Status:\n";
 print_r($monitorStatus);
 
+print "\nGroups Filtered:\n";
 print_r($groupsFiltered);
+print "\nElements Filtered:\n";
 print_r($elementsFiltered);
+print "\nMonitors Filtered:\n";
 print_r($monitorsFiltered);
 
+print "\nError Message:\n";
 print_r($errorMsg);
-
-?>
