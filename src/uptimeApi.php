@@ -83,7 +83,7 @@ class uptimeApi {
 	
 	public function getApiInfo(&$error = "") {
 		// Access up.time API
-		$output = $this->getJSON("");
+		$output = $this->getJSON("", "Get");
 		// Return the output
 		return $output;
 	}
@@ -107,7 +107,7 @@ class uptimeApi {
 		}
 		else {
 			// Access up.time API
-			$output = $this->getJSON($apiRequest, $error, false);
+			$output = $this->getJSON($apiRequest, "Get", $error, false);
 			// Save to cache
 			$this->cacheElements = $output;
 			$this->cacheElementsLastCheck = time();
@@ -128,7 +128,7 @@ class uptimeApi {
 		}
 		else {
 			// Access up.time API
-			$output = $this->getJSON($apiRequest, $error, false);
+			$output = $this->getJSON($apiRequest, "Get", $error, false);
 			// Save to cache
 			$this->cacheMonitors = $output;
 			$this->cacheMonitorsLastCheck = time();
@@ -149,7 +149,7 @@ class uptimeApi {
 		}
 		else {
 			// Access up.time API
-			$output = $this->getJSON($apiRequest, $error, false);
+			$output = $this->getJSON($apiRequest, "Get", $error, false);
 			// Save to cache
 			$this->cacheGroups = $output;
 			$this->cacheGroupsLastCheck = time();
@@ -169,7 +169,7 @@ class uptimeApi {
 		if ($id > 0) {
 			$apiRequest = "{$cmd}/{$id}/status";
 			// Access up.time API
-			$output = $this->getJSON($apiRequest, $error, false);
+			$output = $this->getJSON($apiRequest, "Get", $error, false);
 		}
 		else {
 			// $id is not a valid number; so return empty array(?)
@@ -186,7 +186,7 @@ class uptimeApi {
 		if ($id > 0) {
 			$apiRequest = "{$cmd}/{$id}/status";
 			// Access up.time API
-			$output = $this->getJSON($apiRequest, $error, false);
+			$output = $this->getJSON($apiRequest, "Get", $error, false);
 		}
 		else {
 			// $id is not a valid number; so return empty array(?)
@@ -203,7 +203,7 @@ class uptimeApi {
 		if ($id > 0) {
 			$apiRequest = "{$cmd}/{$id}/status";
 			// Access up.time API
-			$output = $this->getJSON($apiRequest, $error, false);
+			$output = $this->getJSON($apiRequest, "Get", $error, false);
 		}
 		else {
 			// $id is not a valid number; so return empty array(?)
@@ -243,6 +243,26 @@ class uptimeApi {
 		return $output;
 	}
 
+	// Delete an element
+	public function deleteElement ( $id, &$error = "" ) {
+		// return either all of the elements, or the element provided by ID, or all elements with some filter applied
+		
+		$cmd = "/{$this->apiVersion}/elements";
+		// verify the $id is a number
+		$id = intval(trim($id));
+		if ($id > 0) {
+			$apiRequest = "{$cmd}/{$id}";
+			// Access up.time API
+			$output = $this->getJSON($apiRequest, "Delete", $error, false);
+		// return status for either all of the elements, or the element provided by ID, or all elements with some filter applied
+		
+		}
+		else {
+			// $id is not a valid number; so return empty array(?)
+		}
+		// Return the output
+		return $output;
+	}
 	// Monitor Helper Functions
 	// Add last transition times
 	protected function addLengthOfOutages(&$monitors) {
@@ -371,7 +391,7 @@ class uptimeApi {
 	// Internal class functions
 	
 	// Make the call to the up.time API via JSON
-	public function getJSON( $apiRequest, &$error = "", $dieOnError = true, $autoDecodeJSON = true ) {
+	public function getJSON( $apiRequest,$requestType, &$error = "", $dieOnError = true, $autoDecodeJSON = true ) {
 		// clear error string
 		$error = "";
 		// initialize our curl session
@@ -384,6 +404,7 @@ class uptimeApi {
 			curl_setopt($session, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
 			curl_setopt($session, CURLOPT_USERPWD, "{$this->apiUsername}:{$this->apiPassword}" );
 		}
+		
 		curl_setopt($session, CURLOPT_RETURNTRANSFER, true);
 		// get around any SSL certificate restrictions
 		// if SSL certificate is valid and purchased, change these to "true"
@@ -391,7 +412,15 @@ class uptimeApi {
 			curl_setopt($session, CURLOPT_SSL_VERIFYHOST, false);
 			curl_setopt($session, CURLOPT_SSL_VERIFYPEER, false);
 		}
-
+		
+		if ($requestType == "Get") {
+			curl_setopt($session, CURLOPT_HTTPGET, True);
+		} elseif ($requestType == "Delete") {
+			curl_setopt($session, CURLOPT_CUSTOMREQUEST, "DELETE");
+		} else {
+			print "Skipped";
+		}
+		
 		// fetch our list of elements
 		$output = curl_exec($session);
 		// get HTTP result status (including HTTP code)
