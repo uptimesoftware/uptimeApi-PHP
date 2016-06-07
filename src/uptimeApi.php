@@ -15,7 +15,6 @@
  */
 class uptimeApi {
 	protected $cacheDuration = 30;	// duration of cache (in seconds)
-
 	protected $apiSSL;
 	protected $apiHostname;
 	protected $apiPort;
@@ -30,8 +29,6 @@ class uptimeApi {
 	protected $cacheElementsLastCheck;
 	protected $cacheMonitors;
 	protected $cacheMonitorsLastCheck;
-
-
 	public function __construct( $username, $password, $hostname = "localhost", $port = "9997", $version = "v1", $ssl = true ) {
 		// initialize class with provided connection options
 		// requires error checking
@@ -73,7 +70,6 @@ class uptimeApi {
 			$this->apiSSL = false;
 		}
 	}
-
 	public function setCredentials($username, $password) {
 		// apiUsername
 		$this->apiUsername = substr(trim($username), 0, 32);
@@ -112,6 +108,7 @@ class uptimeApi {
 			$this->cacheElements = $output;
 			$this->cacheElementsLastCheck = time();
 		}
+
 		// Apply filter
 		$output = $this->runFilter($output, $filter);
 		// Return the output
@@ -140,7 +137,6 @@ class uptimeApi {
 	}
 	public function getGroups ( $filter = "", &$error = "" ) {
 		// return either all groups, or the group provided by the ID, of all groups with some filter applied
-
 		$apiRequest = "/{$this->apiVersion}/groups";
 		
 		// Check if we have a recently cached copy first
@@ -159,7 +155,6 @@ class uptimeApi {
 		// Return the output
 		return $output;
 	}
-
 	public function getElementStatus ( $id, &$error = "" ) {
 		// return status for either all of the elements, or the element provided by ID, or all elements with some filter applied
 		$cmd = "/{$this->apiVersion}/elements";
@@ -242,7 +237,6 @@ class uptimeApi {
 		// Return the output
 		return $output;
 	}
-
 	// Delete an element
 	public function deleteElement ( $id, &$error = "" ) {
 		// return either all of the elements, or the element provided by ID, or all elements with some filter applied
@@ -263,6 +257,38 @@ class uptimeApi {
 		// Return the output
 		return $output;
 	}
+	
+	
+	// Add an element
+	public function addElement ( $providedopts = array(), &$error = "" ) {
+		$cmd = "/{$this->apiVersion}/elements";
+	
+		$defaultopts = array(
+			'name' => 'localhost',
+			'description' => '',
+			'hostname' => 'localhost',
+			'groupId' => 1,
+			'type' => 'Server',
+			'collectionMethod' => array(
+				'connectionType' => 'agent',
+				'useGlobalConnectionSettings' => false,
+				'port' => 9998,
+				'useSSL' => false 
+				)
+		);
+		
+		$elementopts = array_merge( $defaultopts, $providedopts );		
+		
+		$apiRequest = "{$cmd}";
+		// Access up.time API
+		$output = $this->getJSON($apiRequest, "Post", $error, false, true, $elementopts);
+
+		// Return the output
+		return $output;
+	}
+	
+	
+	
 	// Monitor Helper Functions
 	// Add last transition times
 	protected function addLengthOfOutages(&$monitors) {
@@ -385,13 +411,12 @@ class uptimeApi {
 			}
 		}
 	}
-
 	
 	
 	// Internal class functions
 	
 	// Make the call to the up.time API via JSON
-	public function getJSON( $apiRequest,$requestType, &$error = "", $dieOnError = true, $autoDecodeJSON = true ) {
+	public function getJSON( $apiRequest,$requestType, &$error = "", $dieOnError = true, $autoDecodeJSON = true, $content = "" ) {
 		// clear error string
 		$error = "";
 		// initialize our curl session
@@ -417,6 +442,11 @@ class uptimeApi {
 			curl_setopt($session, CURLOPT_HTTPGET, True);
 		} elseif ($requestType == "Delete") {
 			curl_setopt($session, CURLOPT_CUSTOMREQUEST, "DELETE");
+		} elseif ($requestType == "Post") {
+			curl_setopt($session, CURLOPT_HTTPHEADER, array("Content-type: application/json"));
+			curl_setopt($session, CURLOPT_POST, true);
+			$json_content = json_encode($content);
+			curl_setopt($session, CURLOPT_POSTFIELDS, $json_content);
 		} else {
 			print "Skipped";
 		}
@@ -454,12 +484,10 @@ class uptimeApi {
 			}
 		}
 		curl_close($session);
-
 		if ($autoDecodeJSON) {
 			// parse json objects into array
 			$output = json_decode ( $output, true );
 		}
-
 		// return parsed json output
 		return $output;
 	}
