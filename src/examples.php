@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set('America/Montreal');
 // require the uptimeApi
 require_once("uptimeApi.php");
 
